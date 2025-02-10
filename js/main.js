@@ -28,6 +28,7 @@ const createScene = async function () {
     const missBGM = new Audio('music/miss.mp3');
     const clearBGM = new Audio('music/game_clear.mp3');
     const failBGM = new Audio('music/game_fail.mp3');
+    mainBGM.autoplay = true;
     mainBGM.play();
     mainBGM.loop = true;
     mainBGM.volume = 0.5;
