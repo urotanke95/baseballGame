@@ -35,7 +35,7 @@ const createScene = async function () {
 
     // カメラ
     const camera = new BABYLON.ArcRotateCamera("camera", 0, Math.PI / 2.5, 5, new BABYLON.Vector3(0, 1, 0), scene);
-    camera.attachControl(canvas, true);
+    // camera.attachControl(canvas, true);
     const cameraBase = camera.position.clone();
     let isCameraFollow = false;
     let cameraDelta = 0;
@@ -611,4 +611,3 @@ engine.runRenderLoop(() => {
 window.addEventListener("resize", () => {
     engine.resize();
 });
-
