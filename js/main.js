@@ -28,10 +28,6 @@ const createScene = async function () {
     const missBGM = new Audio('music/miss.mp3');
     const clearBGM = new Audio('music/game_clear.mp3');
     const failBGM = new Audio('music/game_fail.mp3');
-    mainBGM.autoplay = true;
-    mainBGM.play();
-    mainBGM.loop = true;
-    mainBGM.volume = 0.5;
 
     // カメラ
     const camera = new BABYLON.ArcRotateCamera("camera", 0, Math.PI / 2.5, 5, new BABYLON.Vector3(0, 1, 0), scene);
@@ -48,8 +44,6 @@ const createScene = async function () {
     
     // バット
     const bat = BABYLON.MeshBuilder.CreateCylinder("bat", { height: 0.75, diameter: 0.05 }, scene);
-    const axes = new BABYLON.Debug.AxesViewer(scene, 0.5)
-    // bat.position = new BABYLON.Vector3(0.2, 3.2, 0.9);
     bat.setPivotPoint(new BABYLON.Vector3(0, -0.375, 0)); // バットの先端を回転中心に
     bat.rotation = new BABYLON.Vector3(-Math.PI/4, 0, 0);
     bat.material = new BABYLON.StandardMaterial("batMat", scene);
@@ -77,7 +71,7 @@ const createScene = async function () {
     let level = "BEGINNER";
     // 難易度選択
     let buttonGroup = [];
-    const createButton = (name, text, top) => {
+    const createButton = (name, text, top, press = true) => {
         const startButton = BABYLON.GUI.Button.CreateSimpleButton(name, text);
         buttonGroup.push(startButton);
         startButton.width = 0.2;
@@ -87,114 +81,120 @@ const createScene = async function () {
         startButton.background = "green";
         startButton.cornerRadius = 20;
         startButton.fontFamily = "KFhimaji";
-        startButton.isPointerBlocker = true;
-        startButton.onPointerClickObservable.add(() => {
-            isGameStart = true;
-            level = name;
-            if (name == "ROBIKASU") {
-                mainBGM.pause();
-                robikasuBGM.play();
-                robikasuBGM.loop = true;
-                const assetPath = "https://raw.githubusercontent.com/eldinor/ForBJS/master/Lava_005_SD/"
-                ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", assetPath +
-                    "Lava_005_DISP.png",
-                    1000, 1000, 400, 0, 0.005, scene, false);
-            
-            
-                let material = new BABYLON.PBRMaterial("mat", scene);
-                material.albedoTexture = new BABYLON.Texture(assetPath +"Lava_005_COLOR.jpg", scene);
-                material.albedoTexture.uScale = 200;
-                material.albedoTexture.vScale = 200;
-                material.bumpTexture = new BABYLON.Texture(assetPath +"Lava_005_NORM.jpg", scene);
-                material.bumpTexture.uScale = 200;
-                material.bumpTexture.vScale = 200;
-                material.bumpTexture.level = 0.5;
-                material.emissiveTexture = new BABYLON.Texture(assetPath +"spider_webs_compressed.jpg", scene);
-                material.emissiveTexture.uScale = 200;
-                material.emissiveTexture.vScale = 200;
-                material.emissiveColor = new BABYLON.Color3(245/255, 20/255, 20/255);
-                material.ambientTexture = new BABYLON.Texture(assetPath +"Lava_005_OCC.jpg", scene);
-                material.ambientTexture.uScale = 200;
-                material.ambientTexture.vScale = 200;
-                material.metallicTexture = new BABYLON.Texture(assetPath +"Lava_005_ROUGH.jpg", scene);
-                material.roughness = 1;
-                material.metallic = 0.1;
-                material.useRoughnessFromMetallicTextureAlpha = true;
-                material.useRoughnessFromMetallicTextureGreen = false;
-                material.useMetallnessFromMetallicTextureBlue = false;
+        if (press) {
+            startButton.isPointerBlocker = true;
+            startButton.onPointerClickObservable.add(() => {
+                isGameStart = true;
+                level = name;
+                if (name == "ROBIKASU") {
+                    mainBGM.pause();
+                    robikasuBGM.play();
+                    robikasuBGM.loop = true;
+                    const assetPath = "https://raw.githubusercontent.com/eldinor/ForBJS/master/Lava_005_SD/"
+                    ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", assetPath +
+                        "Lava_005_DISP.png",
+                        1000, 1000, 400, 0, 0.005, scene, false);
                 
-                ground.material = material;
-            
-                material.clearCoat.isEnabled = true;
-                material.clearCoat.bumpTexture = new BABYLON.Texture(assetPath +"Lava_005_NORM.jpg", scene);
-                material.clearCoat.bumpTexture.level = 0.0;
-            
-                var alpha = 0;
-                scene.registerBeforeRender(function () {
-                    material.albedoTexture.uOffset += 0.001;
-                    material.bumpTexture.uOffset += 0.001;
-                    material.ambientTexture.uOffset += 0.001;
-                    material.metallicTexture.uOffset += 0.001;   
-                    material.emissiveTexture.uOffset += 0.01; 
-                    material.emissiveTexture.vOffset -= 0.005; 
-                    ground.scaling.y += Math.sin(alpha) / 100;
-                    alpha += 0.01;material.clearCoat.bumpTexture.level  += Math.sin(alpha) / 100;
-                });
-            
-            }
-            buttonGroup.forEach((button) =>{
-                advancedTexture.removeControl(button);
-            })
+                
+                    let material = new BABYLON.PBRMaterial("mat", scene);
+                    material.albedoTexture = new BABYLON.Texture(assetPath +"Lava_005_COLOR.jpg", scene);
+                    material.albedoTexture.uScale = 200;
+                    material.albedoTexture.vScale = 200;
+                    material.bumpTexture = new BABYLON.Texture(assetPath +"Lava_005_NORM.jpg", scene);
+                    material.bumpTexture.uScale = 200;
+                    material.bumpTexture.vScale = 200;
+                    material.bumpTexture.level = 0.5;
+                    material.emissiveTexture = new BABYLON.Texture(assetPath +"spider_webs_compressed.jpg", scene);
+                    material.emissiveTexture.uScale = 200;
+                    material.emissiveTexture.vScale = 200;
+                    material.emissiveColor = new BABYLON.Color3(245/255, 20/255, 20/255);
+                    material.ambientTexture = new BABYLON.Texture(assetPath +"Lava_005_OCC.jpg", scene);
+                    material.ambientTexture.uScale = 200;
+                    material.ambientTexture.vScale = 200;
+                    material.metallicTexture = new BABYLON.Texture(assetPath +"Lava_005_ROUGH.jpg", scene);
+                    material.roughness = 1;
+                    material.metallic = 0.1;
+                    material.useRoughnessFromMetallicTextureAlpha = true;
+                    material.useRoughnessFromMetallicTextureGreen = false;
+                    material.useMetallnessFromMetallicTextureBlue = false;
+                    
+                    ground.material = material;
+                
+                    material.clearCoat.isEnabled = true;
+                    material.clearCoat.bumpTexture = new BABYLON.Texture(assetPath +"Lava_005_NORM.jpg", scene);
+                    material.clearCoat.bumpTexture.level = 0.0;
+                
+                    var alpha = 0;
+                    scene.registerBeforeRender(function () {
+                        material.albedoTexture.uOffset += 0.001;
+                        material.bumpTexture.uOffset += 0.001;
+                        material.ambientTexture.uOffset += 0.001;
+                        material.metallicTexture.uOffset += 0.001;   
+                        material.emissiveTexture.uOffset += 0.01; 
+                        material.emissiveTexture.vOffset -= 0.005; 
+                        ground.scaling.y += Math.sin(alpha) / 100;
+                        alpha += 0.01;material.clearCoat.bumpTexture.level  += Math.sin(alpha) / 100;
+                    });
+                
+                } else {
+                    mainBGM.play();
+                    mainBGM.loop = true;
+                    mainBGM.volume = 0.5;
+                }
+                buttonGroup.forEach((button) =>{
+                    advancedTexture.removeControl(button);
+                })
 
-            // 押したらテキストが出てくる
-            resultBlock.text = "";
-            resultBlock.fontSize = 50;
-            resultBlock.top = canvas.height / 3;
-            resultBlock.left = 0;
-            resultBlock.color = "green";
-            resultBlock.outlineWidth = 4;  // 境界線をつける
-            resultBlock.outlineColor = "black"; // 境界線の色
-            resultBlock.shadowBlur = 4;  // 影をつける
-            resultBlock.shadowColor = "rgba(205, 44, 44, 0.5)";  // 影の色
-            resultBlock.isPointerBlocker = false;
-            resultBlock.fontFamily = "KFhimaji";
-            advancedTexture.addControl(resultBlock);
+                // 押したらテキストが出てくる
+                resultBlock.text = "";
+                resultBlock.fontSize = 50;
+                resultBlock.top = canvas.height / 3;
+                resultBlock.left = 0;
+                resultBlock.color = "green";
+                resultBlock.outlineWidth = 4;  // 境界線をつける
+                resultBlock.outlineColor = "black"; // 境界線の色
+                resultBlock.shadowBlur = 4;  // 影をつける
+                resultBlock.shadowColor = "rgba(205, 44, 44, 0.5)";  // 影の色
+                resultBlock.isPointerBlocker = false;
+                resultBlock.fontFamily = "KFhimaji";
+                advancedTexture.addControl(resultBlock);
 
-            scoreBlock.text = "もくひょう: " + String(CLEAR_HR[level]) + "本\nホームラン: " + String(homerun_num) + "本\nのこり　　: " + String(MAX_TRIAL[level] - trial) + "球";
-            scoreBlock.fontSize = 35;
-            scoreBlock.top = canvas.height / 3;
-            scoreBlock.left = canvas.width / 3;
-            scoreBlock.color = "green";
-            scoreBlock.outlineWidth = 4;  // 境界線をつける
-            scoreBlock.outlineColor = "black"; // 境界線の色
-            scoreBlock.shadowBlur = 4;  // 影をつける
-            scoreBlock.shadowColor = "rgba(205, 44, 44, 0.5)";  // 影の色
-            scoreBlock.isPointerBlocker = false;
-            scoreBlock.fontFamily = "KFhimaji";
-            advancedTexture.addControl(scoreBlock);
+                scoreBlock.text = "もくひょう: " + String(CLEAR_HR[level]) + "本\nホームラン: " + String(homerun_num) + "本\nのこり　　: " + String(MAX_TRIAL[level] - trial) + "球";
+                scoreBlock.fontSize = 35;
+                scoreBlock.top = canvas.height / 3;
+                scoreBlock.left = canvas.width / 3;
+                scoreBlock.color = "green";
+                scoreBlock.outlineWidth = 4;  // 境界線をつける
+                scoreBlock.outlineColor = "black"; // 境界線の色
+                scoreBlock.shadowBlur = 4;  // 影をつける
+                scoreBlock.shadowColor = "rgba(205, 44, 44, 0.5)";  // 影の色
+                scoreBlock.isPointerBlocker = false;
+                scoreBlock.fontFamily = "KFhimaji";
+                advancedTexture.addControl(scoreBlock);
 
-            statBlock.text = "";
-            statBlock.fontSize = 70;
-            statBlock.color = "green";
-            statBlock.outlineWidth = 4;  // 境界線をつける
-            statBlock.outlineColor = "black"; // 境界線の色
-            statBlock.shadowBlur = 4;  // 影をつける
-            statBlock.shadowColor = "rgba(205, 44, 44, 0.5)";  // 影の色
-            statBlock.isPointerBlocker = false;
-            statBlock.fontFamily = "KFhimaji";
-            advancedTexture.addControl(statBlock);
-        });
+                statBlock.text = "";
+                statBlock.fontSize = 70;
+                statBlock.color = "green";
+                statBlock.outlineWidth = 4;  // 境界線をつける
+                statBlock.outlineColor = "black"; // 境界線の色
+                statBlock.shadowBlur = 4;  // 影をつける
+                statBlock.shadowColor = "rgba(205, 44, 44, 0.5)";  // 影の色
+                statBlock.isPointerBlocker = false;
+                statBlock.fontFamily = "KFhimaji";
+                advancedTexture.addControl(statBlock);
+            });
+        }
         advancedTexture.addControl(startButton);
         return startButton;
     }
 
     // 開始ボタン
-    createButton("BEGINNER", "かんたん", - canvas.height / 3);
-    createButton("EASY", "すこしはやい", - canvas.height / 6);
-    createButton("MEDIUM", "まきゅう1", 0);
-    createButton("HARD", "まきゅう2", canvas.height / 6);
-    createButton("ROBIKASU", "さいきょう", canvas.height / 3);
-    
+    createButton("BEGINNER", "かんたん", - canvas.height * 7.5 / 18);
+    createButton("EASY", "すこしはやい", - canvas.height * 4.5/ 18);
+    createButton("MEDIUM", "まきゅう1", - canvas.height * 1.5/ 18);
+    createButton("HARD", "まきゅう2", canvas.height * 1.5/ 18);
+    createButton("ROBIKASU", "さいきょう", canvas.height * 4.5 / 18);
+    createButton("HOWTO", "(Spaceキー) スイング", canvas.height * 7.5 / 18, false);
 
     const updateScore = () => {
         scoreBlock.text = "もくひょう: " + String(CLEAR_HR[level]) + "本\nホームラン: " + String(homerun_num) + "本\nのこり　　: " + String(MAX_TRIAL[level] - trial) + "球";
