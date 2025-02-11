@@ -482,10 +482,10 @@ const createScene = async function () {
         }
         ball.position = new BABYLON.Vector3(-18.48, 1, 0);
         if (level == "BEGINNER" || level == "HARD") {
-            ballSpeed = new BABYLON.Vector3(0.15, 0, 0);
+            ballSpeed = new BABYLON.Vector3(0.2, 0, 0);
         }
         else if (level == "EASY" || level == "MEDIUM" || level == "ROBIKASU") {
-            ballSpeed = new BABYLON.Vector3(0.25, 0, 0);
+            ballSpeed = new BABYLON.Vector3(0.3, 0, 0);
         }
         isHit = false;
         throwBGM.play();
@@ -498,7 +498,7 @@ const createScene = async function () {
         //まきゅう1
         ball.isVisible = ((level == "MEDIUM" || level == "ROBIKASU") && ball.position.x > -5.0)? false: true;
         //まきゅう2
-        ballSpeed.x = ((level == "HARD" || level == "ROBIKASU") && ballSpeed.x > 0)? Math.min(0.3, Math.max(0.02, ballSpeed.x + ((Math.random() -0.5) * 0.1))) :ballSpeed.x;
+        ballSpeed.x = ((level == "HARD" || level == "ROBIKASU") && ball.position.x < -8.0 && ballSpeed.x > 0)? Math.min(0.25, Math.max(0.05, ballSpeed.x + ((Math.random() -0.5) * 0.1))) :ballSpeed.x;
         
         if (!isHit && ball && isGameStart) {
             ball.position.addInPlace(ballSpeed);
