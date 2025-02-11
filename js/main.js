@@ -529,7 +529,7 @@ const createScene = async function () {
 
     scene.onBeforeRenderObservable.add(() => {
         if (hand) {
-            bat.position.copyFrom(hand.getTransformNode().absolutePosition.addInPlace(new BABYLON.Vector3(-0., 0.34, 0)));
+            bat.position.copyFrom(hand.getTransformNode().absolutePosition.addInPlace(new BABYLON.Vector3(-0., 0.36, 0)));
         }
         //まきゅう1
         ball.isVisible = ((level == "MEDIUM" || level == "ROBIKASU") && ball.position.x > -5.0)? false: true;
