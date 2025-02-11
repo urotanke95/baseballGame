@@ -30,9 +30,24 @@
                 src: url("./font/KFhimaji.otf") format("opentype");
             }
 
+            #fps {
+                position: absolute;
+                background-color: black;
+                border: 2px solid white;
+                opacity: 0.4;
+                text-align: center;
+                font-size: 15px;
+                color: white;
+                top: 15px;
+                left: 10px;
+                width: 60px;
+                height: 20px;
+            }
+
         </style>
     </head>
     <body>
+        <div id="fps">0</div>
         <canvas id="renderCanvas"></canvas>
         <link rel="preload" href="font/KFhimaji.otf" as="font" type="font/otf" crossorigin="anonymous">
         <script src="https://cdn.babylonjs.com/havok/HavokPhysics_umd.js"></script>

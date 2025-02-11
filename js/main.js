@@ -1,5 +1,6 @@
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
+let divFps = document.getElementById("fps");
 
 let havokInstance;
 HavokPhysics().then((havok) => {
@@ -164,7 +165,7 @@ const createScene = async function () {
 
                 scoreBlock.text = "もくひょう: " + String(CLEAR_HR[level]) + "本\nホームラン: " + String(homerun_num) + "本\nのこり　　: " + String(MAX_TRIAL[level] - trial) + "球";
                 scoreBlock.fontSize = isSmartPhone()? 20: 30;
-                scoreBlock.top = - canvas.height / 2.5;
+                scoreBlock.top = - canvas.height / 2.75;
                 scoreBlock.left =  isSmartPhone()? - canvas.width / 4: - canvas.width / 3;
                 scoreBlock.color = "rgba(247, 194, 104, 0.66)";
                 scoreBlock.outlineWidth = 4;  // 境界線をつける
@@ -192,12 +193,16 @@ const createScene = async function () {
     }
 
     // 開始ボタン
-    createButton("BEGINNER", "かんたん", - canvas.height * 7.5 / 18);
-    createButton("EASY", "すこしはやい", - canvas.height * 4.5/ 18);
-    createButton("MEDIUM", "まきゅう1", - canvas.height * 1.5/ 18);
-    createButton("HARD", "まきゅう2", canvas.height * 1.5/ 18);
-    createButton("ROBIKASU", "さいきょう", canvas.height * 4.5 / 18);
-    createButton("HOWTO", "(PC) Space (スマホ) タップ", canvas.height * 7.5 / 18, false);
+    const showMenu = () => {
+        createButton("BEGINNER", "かんたん", - canvas.height * 7.5 / 18);
+        createButton("EASY", "すこしはやい", - canvas.height * 4.5/ 18);
+        createButton("MEDIUM", "まきゅう1", - canvas.height * 1.5/ 18);
+        createButton("HARD", "まきゅう2", canvas.height * 1.5/ 18);
+        createButton("ROBIKASU", "さいきょう", canvas.height * 4.5 / 18);
+        createButton("HOWTO", "(PC) Space (スマホ) タップ", canvas.height * 7.5 / 18, false);
+    }
+
+    showMenu();
 
     const updateScore = () => {
         scoreBlock.text = "もくひょう: " + String(CLEAR_HR[level]) + "本\nホームラン: " + String(homerun_num) + "本\nのこり　　: " + String(MAX_TRIAL[level] - trial) + "球";
@@ -214,6 +219,27 @@ const createScene = async function () {
         }
         isGameStart = false;
         cameraDelta = 0;
+        const resetButton = BABYLON.GUI.Button.CreateSimpleButton("RESET", "RESET");
+        resetButton.width = 0.4;
+        resetButton.height = "50px";
+        resetButton.top = canvas.height * 4.5 / 18;
+        resetButton.color = "white";
+        resetButton.background = "green";
+        resetButton.cornerRadius = 20;
+        resetButton.fontFamily = "KFhimaji";
+        resetButton.isPointerBlocker = true;
+        resetButton.onPointerClickObservable.add(() => {
+            advancedTexture.removeControl(resetButton);
+            // リセット
+            scoreBlock.text = "";
+            statBlock.text = "";
+            ball.position = new BABYLON.Vector3(-18.44, -1, 0);
+            trial = 0;
+            homerun_num = 0;
+            showMenu();
+            mainBGM.pause();
+        });
+        advancedTexture.addControl(resetButton);
     }
 
     // 球場
@@ -280,14 +306,23 @@ const createScene = async function () {
             });
         });
 
-        // Strike Zone
-        const strikeZone = BABYLON.MeshBuilder.CreateBox("strikeZone", { width: 0.05, height: 0.5, depth: 0.5 }, scene);
+        // Strike Zone(バット補助線)
+        const strikeZone = BABYLON.MeshBuilder.CreateBox("strikeZone", { width: 0.05, height: 0.1, depth: 0.75 }, scene);
         strikeZone.position.y = 1;  // キャッチャー前の適切な高さに配置
         strikeZone.position.x = 0;  // バッターとピッチャーの間
+        strikeZone.rotation.x = Math.PI/12;
         const strikeZoneMaterial = new BABYLON.StandardMaterial("strikeZoneMat", scene);
-        strikeZoneMaterial.diffuseColor = new BABYLON.Color3(0, 0, 1);  // 青
+        strikeZoneMaterial.diffuseColor = new BABYLON.Color3.FromHexString("#f4a460");  // 青
         strikeZoneMaterial.alpha = 0.7;  // 透過率 (0: 完全透明, 1: 不透明)
         strikeZone.material = strikeZoneMaterial;
+        
+        // Strike Point
+        const strikePoint = BABYLON.MeshBuilder.CreateSphere("strikePoint", { diameter: 0.06 }, scene);
+        strikePoint.position = new BABYLON.Vector3(0, 1, 0);  // キャッチャー前の適切な高さに配置
+        const strikePointMaterial = new BABYLON.StandardMaterial("strikePointMat", scene);
+        strikePointMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);  // 青
+        strikePointMaterial.alpha = 0.7;  // 透過率 (0: 完全透明, 1: 不透明)
+        strikePoint.material = strikePointMaterial;
 
         // Catmull-Romスプラインによる補間
         function interpolateControlPoints(points, t) {
@@ -482,10 +517,10 @@ const createScene = async function () {
         }
         ball.position = new BABYLON.Vector3(-18.48, 1, 0);
         if (level == "BEGINNER" || level == "HARD") {
-            ballSpeed.x = isSmartPhone()? 0.4:0.2;
+            ballSpeed.x = isSmartPhone()? 0.4: 0.2;
         }
         else if (level == "EASY" || level == "MEDIUM" || level == "ROBIKASU") {
-            ballSpeed.x = isSmartPhone()? 0.6:0.3;
+            ballSpeed.x = isSmartPhone()? 0.55:0.275;
         }
         isHit = false;
         throwBGM.play();
@@ -498,7 +533,7 @@ const createScene = async function () {
         //まきゅう1
         ball.isVisible = ((level == "MEDIUM" || level == "ROBIKASU") && ball.position.x > -5.0)? false: true;
         //まきゅう2
-        ballSpeed.x = ((level == "HARD" || level == "ROBIKASU") && ball.position.x < -8.0 && ballSpeed.x > 0)? Math.max(0.05, ballSpeed.x + ((Math.random() -0.5) * 0.1)) :ballSpeed.x;
+        ballSpeed.x = ((level == "HARD" || level == "ROBIKASU") && ball.position.x < -8.0 && ballSpeed.x > 0)? Math.min(isSmartPhone()? 0.4: 0.2, Math.max(0.05, ballSpeed.x + ((Math.random() -0.5) * 0.1))) :ballSpeed.x;
         
         if (!isHit && ball && isGameStart) {
             ball.position.addInPlace(ballSpeed);
@@ -516,6 +551,7 @@ const createScene = async function () {
                 
                 const angle = Math.atan2(-ball.position.x, 1);
                 const bonus = Math.abs(ball.position.x) < 0.4? 2.6 + Math.random() / 2: 1 + Math.random();
+                console.log(-ball.position.x, bonus);
                 const HEIGHT_SCALE = Math.max(10, 10 * bonus / 1.5);
                 const DIR_SCALE = 10 * bonus;
                 const POWER_SCALE = 10 * bonus;
@@ -578,45 +614,8 @@ const createScene = async function () {
         }
     });
     
-    // バットをスイングするアニメーション (PC)
-    window.addEventListener("keydown", (event) =>  {
-        if (event.key === " ") { // スペースキーでスイング
-            const anim = new BABYLON.Animation("swing", "rotation", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-            
-            const keys = [];
-            keys.push({ frame: 0, value: new BABYLON.Vector3(-Math.PI/4, 0, 0) });
-            keys.push({ frame: 5, value: new BABYLON.Vector3( Math.PI/1.5, 0, 0) });
-            keys.push({ frame: 10, value: new BABYLON.Vector3(-Math.PI/6, -Math.PI/4, -Math.PI/4) });
-            
-            anim.setKeys(keys);
-            bat.animations = [anim];
-            scene.beginAnimation(bat, 0, 20, false);
-
-            const anim_2 = new BABYLON.Animation("swing2", "rotation.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-            const keys_2 = [];
-            keys_2.push({ frame: 0, value: Math.PI/2 });
-            keys_2.push({ frame: 5, value: -Math.PI / 2 });
-            keys_2.push({ frame: 20, value: Math.PI / 2 });
-            anim_2.setKeys(keys_2);
-            bat2.animations = [anim_2];
-            scene.beginAnimation(bat2, 0, 20, false);
-
-            if (animationGroups["Batter"]["Idle"]) {
-                animationGroups["Batter"]["Idle"].stop();
-            }
-            animationGroups["Batter"]["Hit"].play(false);
-            swingBGM.play();
-            animationGroups["Batter"]["Hit"].onAnimationEndObservable.addOnce(()=>{
-                animationGroups["Batter"]["Idle"].play(true);
-                bat.rotation = new BABYLON.Vector3(-Math.PI/4, 0, 0);
-            })
-        }
-    });
-
-    // バットをスイングするアニメーション (スマホ)
-    window.addEventListener("touchstart", (event) =>  {
+    const createSwingAnimation = () => {
         const anim = new BABYLON.Animation("swing", "rotation", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-        
         const keys = [];
         keys.push({ frame: 0, value: new BABYLON.Vector3(-Math.PI/4, 0, 0) });
         keys.push({ frame: 5, value: new BABYLON.Vector3( Math.PI/1.5, 0, 0) });
@@ -630,10 +629,11 @@ const createScene = async function () {
         const keys_2 = [];
         keys_2.push({ frame: 0, value: Math.PI/2 });
         keys_2.push({ frame: 5, value: -Math.PI / 2 });
-        keys_2.push({ frame: 20, value: Math.PI / 2 });
+        keys_2.push({ frame: 20, value: - Math.PI / 2 });
+        keys_2.push({ frame: 40, value: Math.PI / 2 });
         anim_2.setKeys(keys_2);
         bat2.animations = [anim_2];
-        scene.beginAnimation(bat2, 0, 20, false);
+        scene.beginAnimation(bat2, 0, 40, false);
 
         if (animationGroups["Batter"]["Idle"]) {
             animationGroups["Batter"]["Idle"].stop();
@@ -641,16 +641,27 @@ const createScene = async function () {
         animationGroups["Batter"]["Hit"].play(false);
         swingBGM.play();
         animationGroups["Batter"]["Hit"].onAnimationEndObservable.addOnce(()=>{
-            animationGroups["Batter"]["Idle"].play(true);
+            animationGroups["Batter"]["Idle"].play(true); 
             bat.rotation = new BABYLON.Vector3(-Math.PI/4, 0, 0);
-        })
+        });
+    }
+    // バットをスイングするアニメーション (PC)
+    window.addEventListener("keydown", (event) =>  {
+        if (event.key === " ") { // スペースキーでスイング
+            createSwingAnimation();
+        }
     });
-    console.log(screen.height);
+
+    // バットをスイングするアニメーション (スマホ)
+    window.addEventListener("touchstart", (event) =>  {
+        createSwingAnimation();
+    });
     return scene;
 };
 
 const scene = await createScene();
 engine.runRenderLoop(() => {
+    divFps.innerHTML = engine.getFps().toFixed() + " fps";
     scene.render();
 });
 
