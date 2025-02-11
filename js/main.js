@@ -542,7 +542,7 @@ const createScene = async function () {
         //まきゅう1
         ball.isVisible = ((level == "MEDIUM" || level == "ROBIKASU") && ball.position.x > -5.0)? false: true;
         //まきゅう2
-        ballSpeed.x = ((level == "HARD" || level == "ROBIKASU") && ball.position.x < -8.0 && ballSpeed.x > 0)? Math.min(isSmartPhone()? 0.4: 0.2, Math.max(0.05, ballSpeed.x + ((Math.random() -0.5) * 0.1))) :ballSpeed.x;
+        ballSpeed.x = ((level == "HARD" || level == "ROBIKASU") && ball.position.x < -8.0 && ballSpeed.x > 0)? Math.min(0.65 * scene.getAnimationRatio(), Math.max(0.05, ballSpeed.x + ((Math.random() -0.5) * 0.1))) :ballSpeed.x;
         
         if (!isHit && ball && isGameStart) {
             ball.position.addInPlace(ballSpeed);
