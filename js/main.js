@@ -46,7 +46,7 @@ const createScene = async function () {
     // バット
     const bat = BABYLON.MeshBuilder.CreateCylinder("bat", { height: 0.75, diameter: 0.05 }, scene);
     bat.setPivotPoint(new BABYLON.Vector3(0, -0.375, 0)); // バットの先端を回転中心に
-    bat.rotation = new BABYLON.Vector3(-Math.PI/4, 0, 0);
+    bat.rotation = new BABYLON.Vector3(-Math.PI/4, 0, -Math.PI/12);
     bat.material = new BABYLON.StandardMaterial("batMat", scene);
     bat.material.diffuseColor = new BABYLON.Color3.FromHexString("#f4a460");
 
@@ -426,10 +426,11 @@ const createScene = async function () {
     let batter = null;
 
     let pitcher = null;
-    BABYLON.SceneLoader.ImportMesh("", "./model/motion/", "baseball-bat-motion.glb", scene, function (meshes, particleSystems, skeletons, animationGroupsArray) {
+    BABYLON.SceneLoader.ImportMesh("", "./model/motion/", "baseball-bat-motion2.glb", scene, function (meshes, particleSystems, skeletons, animationGroupsArray) {
         if (meshes.length > 0) {
             batter = meshes[0];
-            batter.position = new BABYLON.Vector3(0, 0, - 0.75);
+            batter.position = new BABYLON.Vector3(0, 0.05, - 0.75);
+            batter.scaling.y = 1.1;
             batter.rotation = new BABYLON.Vector3(0, Math.PI/2, 0);
             
             animationGroupsArray.forEach(animGroup => {
@@ -528,7 +529,7 @@ const createScene = async function () {
 
     scene.onBeforeRenderObservable.add(() => {
         if (hand) {
-            bat.position.copyFrom(hand.getTransformNode().absolutePosition.addInPlace(new BABYLON.Vector3(-0., 0.3, 0)));
+            bat.position.copyFrom(hand.getTransformNode().absolutePosition.addInPlace(new BABYLON.Vector3(-0., 0.34, 0)));
         }
         //まきゅう1
         ball.isVisible = ((level == "MEDIUM" || level == "ROBIKASU") && ball.position.x > -5.0)? false: true;
@@ -617,13 +618,13 @@ const createScene = async function () {
     const createSwingAnimation = () => {
         const anim = new BABYLON.Animation("swing", "rotation", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
         const keys = [];
-        keys.push({ frame: 0, value: new BABYLON.Vector3(-Math.PI/4, 0, 0) });
+        keys.push({ frame: 0, value: new BABYLON.Vector3(-Math.PI/4, 0, -Math.PI/12) });
         keys.push({ frame: 5, value: new BABYLON.Vector3( Math.PI/1.5, 0, 0) });
         keys.push({ frame: 10, value: new BABYLON.Vector3(-Math.PI/6, -Math.PI/4, -Math.PI/4) });
         
         anim.setKeys(keys);
         bat.animations = [anim];
-        scene.beginAnimation(bat, 0, 20, false);
+        scene.beginAnimation(bat, 0, 30, false);
 
         const anim_2 = new BABYLON.Animation("swing2", "rotation.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
         const keys_2 = [];
@@ -642,7 +643,7 @@ const createScene = async function () {
         swingBGM.play();
         animationGroups["Batter"]["Hit"].onAnimationEndObservable.addOnce(()=>{
             animationGroups["Batter"]["Idle"].play(true); 
-            bat.rotation = new BABYLON.Vector3(-Math.PI/4, 0, 0);
+            bat.rotation = new BABYLON.Vector3(-Math.PI/4, 0, -Math.PI/12);
         });
     }
     // バットをスイングするアニメーション (PC)
