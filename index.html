@@ -3,13 +3,24 @@
     <head>
         <title>Qooh's Homerun Derby</title>
         <script src="https://code.jquery.com/pep/0.4.2/pep.min.js"></script>
+        <meta name="viewport" content="width=screen-width, initial-scale=1, minimum-scale=1" />
         <style>
-            canvas {
-                width: 1080px;
-                height: 720px;
+            @media (min-width: 750px) {
+                canvas {
+                    height: 720px;
+                    aspect-ratio: 1/1;
+                }
+            }
+            @media (max-width: 750px) {
+                canvas {
+                    width: 100%;
+                    aspect-ratio: 9/16;
+                }
             }
             html, body {
                 margin: 0;
+                height: 100%;
+                width: 100%;
             }
             body{
                 overflow-y:hidden;

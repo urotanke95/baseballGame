@@ -56,6 +56,9 @@ const createScene = async function () {
     bat2.rotation = new BABYLON.Vector3(Math.PI/2, Math.PI/2, 0);
     bat2.isVisible = false;
 
+    const isSmartPhone = () => {
+        return screen.width < 750;
+    }
     //ボタン
     const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
     // 一球結果表示用テキスト
@@ -74,8 +77,8 @@ const createScene = async function () {
     const createButton = (name, text, top, press = true) => {
         const startButton = BABYLON.GUI.Button.CreateSimpleButton(name, text);
         buttonGroup.push(startButton);
-        startButton.width = 0.2;
-        startButton.height = "40px";
+        startButton.width = 0.4;
+        startButton.height = "50px";
         startButton.top = top;
         startButton.color = "white";
         startButton.background = "green";
@@ -150,7 +153,7 @@ const createScene = async function () {
                 resultBlock.fontSize = 50;
                 resultBlock.top = canvas.height / 3;
                 resultBlock.left = 0;
-                resultBlock.color = "green";
+                resultBlock.color = "blue";
                 resultBlock.outlineWidth = 4;  // 境界線をつける
                 resultBlock.outlineColor = "black"; // 境界線の色
                 resultBlock.shadowBlur = 4;  // 影をつける
@@ -160,10 +163,10 @@ const createScene = async function () {
                 advancedTexture.addControl(resultBlock);
 
                 scoreBlock.text = "もくひょう: " + String(CLEAR_HR[level]) + "本\nホームラン: " + String(homerun_num) + "本\nのこり　　: " + String(MAX_TRIAL[level] - trial) + "球";
-                scoreBlock.fontSize = 35;
-                scoreBlock.top = canvas.height / 3;
-                scoreBlock.left = canvas.width / 3;
-                scoreBlock.color = "green";
+                scoreBlock.fontSize = isSmartPhone()? 20: 30;
+                scoreBlock.top = - canvas.height / 2.5;
+                scoreBlock.left =  isSmartPhone()? - canvas.width / 4: - canvas.width / 3;
+                scoreBlock.color = "rgba(247, 194, 104, 0.66)";
                 scoreBlock.outlineWidth = 4;  // 境界線をつける
                 scoreBlock.outlineColor = "black"; // 境界線の色
                 scoreBlock.shadowBlur = 4;  // 影をつける
@@ -173,7 +176,7 @@ const createScene = async function () {
                 advancedTexture.addControl(scoreBlock);
 
                 statBlock.text = "";
-                statBlock.fontSize = 70;
+                statBlock.fontSize =  isSmartPhone()? 60: 70;
                 statBlock.color = "green";
                 statBlock.outlineWidth = 4;  // 境界線をつける
                 statBlock.outlineColor = "black"; // 境界線の色
@@ -194,7 +197,7 @@ const createScene = async function () {
     createButton("MEDIUM", "まきゅう1", - canvas.height * 1.5/ 18);
     createButton("HARD", "まきゅう2", canvas.height * 1.5/ 18);
     createButton("ROBIKASU", "さいきょう", canvas.height * 4.5 / 18);
-    createButton("HOWTO", "(Spaceキー) スイング", canvas.height * 7.5 / 18, false);
+    createButton("HOWTO", "(PC) Space (スマホ) タップ", canvas.height * 7.5 / 18, false);
 
     const updateScore = () => {
         scoreBlock.text = "もくひょう: " + String(CLEAR_HR[level]) + "本\nホームラン: " + String(homerun_num) + "本\nのこり　　: " + String(MAX_TRIAL[level] - trial) + "球";
@@ -269,6 +272,13 @@ const createScene = async function () {
             { angle: 225, radius: 90 },
             { angle: 230, radius: 90 }
         ];
+
+        // Tree log
+        const log = BABYLON.SceneLoader.ImportMesh("", "./model/tree_stump/", "tree_stump.obj", scene,  (meshes) => {
+            meshes.forEach(mesh => {
+                mesh.scaling.set(0.1, 0.05, 0.1); // Scale down to 10%
+            });
+        });
 
         // Strike Zone
         const strikeZone = BABYLON.MeshBuilder.CreateBox("strikeZone", { width: 0.05, height: 0.5, depth: 0.5 }, scene);
@@ -421,6 +431,9 @@ const createScene = async function () {
         }
     });
     let ball = BABYLON.MeshBuilder.CreateSphere("ball", { diameter: 0.25 }, scene);
+    ball.material = new BABYLON.StandardMaterial("ballMat", scene);
+    ball.material.diffuseColor = new BABYLON.Color3.FromHexString("#fcba03");
+    ball.material.specularColor= new BABYLON.Color3(0, 0, 0);
     ball.position = new BABYLON.Vector3(-18.44, -1, 0);
     let ballSpeed = new BABYLON.Vector3.Zero();
     let isHit = false;
@@ -503,7 +516,6 @@ const createScene = async function () {
                 
                 const angle = Math.atan2(-ball.position.x, 1);
                 const bonus = Math.abs(ball.position.x) < 0.4? 2.6 + Math.random() / 2: 1 + Math.random();
-                console.log(ball.position.x, bonus);
                 const HEIGHT_SCALE = Math.max(10, 10 * bonus / 1.5);
                 const DIR_SCALE = 10 * bonus;
                 const POWER_SCALE = 10 * bonus;
@@ -515,7 +527,7 @@ const createScene = async function () {
             }
         }
         
-        cameraDelta += engine.getDeltaTime();
+        if (isGameStart) cameraDelta += engine.getDeltaTime();
         //ボールが当たらなかった
         if (3 < ball.position.x) {
             if (!strike && ball.position.x < 4) {
@@ -566,7 +578,7 @@ const createScene = async function () {
         }
     });
     
-    // バットをスイングするアニメーション
+    // バットをスイングするアニメーション (PC)
     window.addEventListener("keydown", (event) =>  {
         if (event.key === " ") { // スペースキーでスイング
             const anim = new BABYLON.Animation("swing", "rotation", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
@@ -600,6 +612,40 @@ const createScene = async function () {
             })
         }
     });
+
+    // バットをスイングするアニメーション (スマホ)
+    window.addEventListener("touchstart", (event) =>  {
+        const anim = new BABYLON.Animation("swing", "rotation", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        
+        const keys = [];
+        keys.push({ frame: 0, value: new BABYLON.Vector3(-Math.PI/4, 0, 0) });
+        keys.push({ frame: 5, value: new BABYLON.Vector3( Math.PI/1.5, 0, 0) });
+        keys.push({ frame: 10, value: new BABYLON.Vector3(-Math.PI/6, -Math.PI/4, -Math.PI/4) });
+        
+        anim.setKeys(keys);
+        bat.animations = [anim];
+        scene.beginAnimation(bat, 0, 20, false);
+
+        const anim_2 = new BABYLON.Animation("swing2", "rotation.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        const keys_2 = [];
+        keys_2.push({ frame: 0, value: Math.PI/2 });
+        keys_2.push({ frame: 5, value: -Math.PI / 2 });
+        keys_2.push({ frame: 20, value: Math.PI / 2 });
+        anim_2.setKeys(keys_2);
+        bat2.animations = [anim_2];
+        scene.beginAnimation(bat2, 0, 20, false);
+
+        if (animationGroups["Batter"]["Idle"]) {
+            animationGroups["Batter"]["Idle"].stop();
+        }
+        animationGroups["Batter"]["Hit"].play(false);
+        swingBGM.play();
+        animationGroups["Batter"]["Hit"].onAnimationEndObservable.addOnce(()=>{
+            animationGroups["Batter"]["Idle"].play(true);
+            bat.rotation = new BABYLON.Vector3(-Math.PI/4, 0, 0);
+        })
+    });
+    console.log(screen.height);
     return scene;
 };
 
