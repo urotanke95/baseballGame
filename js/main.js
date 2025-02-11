@@ -1,5 +1,13 @@
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
+
+// For FPS Debugging
+// const targetFPS = 65;
+// engine.customAnimationFrameRequester = {
+//     requestAnimationFrame: (func) => {
+//         setTimeout(func, Math.round(1000 / targetFPS));
+//     },
+// };
 let divFps = document.getElementById("fps");
 
 let havokInstance;
@@ -12,7 +20,7 @@ const createScene = async function () {
     const scene = new BABYLON.Scene(engine);
     scene.animationPropertiesOverride = new BABYLON.AnimationPropertiesOverride();
     scene.animationPropertiesOverride.enableBlending = true;
-    scene.animationPropertiesOverride.blendingSpeed = 0.05;
+    scene.animationPropertiesOverride.blendingSpeed = 0.15 * scene.getAnimationRatio();
     scene.animationPropertiesOverride.loopMode = 1;
     // 物理エンジンを有効化
     const havokInstance = await HavokPhysics();
@@ -616,25 +624,28 @@ const createScene = async function () {
     });
     
     const createSwingAnimation = () => {
-        const anim = new BABYLON.Animation("swing", "rotation", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-        const keys = [];
-        keys.push({ frame: 0, value: new BABYLON.Vector3(-Math.PI/4, 0, -Math.PI/12) });
-        keys.push({ frame: 5, value: new BABYLON.Vector3( Math.PI/1.5, 0, 0) });
-        keys.push({ frame: 10, value: new BABYLON.Vector3(-Math.PI/6, -Math.PI/4, -Math.PI/4) });
-        
+        console.log(60/scene.getAnimationRatio());
+        const anim = new BABYLON.Animation("swing", "rotation", 60/scene.getAnimationRatio(), BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        const keys = [
+            { frame: 0, value: new BABYLON.Vector3(-Math.PI/4, 0, -Math.PI/12) },
+            { frame: 5/scene.getAnimationRatio(), value: new BABYLON.Vector3(0,Math.PI/6,-Math.PI/3) },
+            { frame: 10/scene.getAnimationRatio(), value: new BABYLON.Vector3( Math.PI/1.5, 0, 0) },
+            { frame: 20/scene.getAnimationRatio(), value: new BABYLON.Vector3(-Math.PI/6, -Math.PI/4, -Math.PI/4) }
+        ];
         anim.setKeys(keys);
         bat.animations = [anim];
-        scene.beginAnimation(bat, 0, 30, false);
+        scene.beginAnimation(bat, 0, 40/scene.getAnimationRatio(), false);
 
-        const anim_2 = new BABYLON.Animation("swing2", "rotation.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-        const keys_2 = [];
-        keys_2.push({ frame: 0, value: Math.PI/2 });
-        keys_2.push({ frame: 5, value: -Math.PI / 2 });
-        keys_2.push({ frame: 20, value: - Math.PI / 2 });
-        keys_2.push({ frame: 40, value: Math.PI / 2 });
+        const anim_2 = new BABYLON.Animation("swing2", "rotation.y", 60/scene.getAnimationRatio(), BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        const keys_2 = [
+            { frame: 0, value: Math.PI/2 },
+            { frame: 10/scene.getAnimationRatio(), value: -Math.PI / 2 },
+            { frame: 40/scene.getAnimationRatio(), value: - Math.PI / 2 },
+            { frame: 80/scene.getAnimationRatio(), value: Math.PI / 2 }
+        ];
         anim_2.setKeys(keys_2);
         bat2.animations = [anim_2];
-        scene.beginAnimation(bat2, 0, 40, false);
+        scene.beginAnimation(bat2, 0, 80/scene.getAnimationRatio(), false);
 
         if (animationGroups["Batter"]["Idle"]) {
             animationGroups["Batter"]["Idle"].stop();
