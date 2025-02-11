@@ -163,10 +163,10 @@ const createScene = async function () {
                 resultBlock.fontFamily = "KFhimaji";
                 advancedTexture.addControl(resultBlock);
 
-                scoreBlock.text = "もくひょう: " + String(CLEAR_HR[level]) + "本\nホームラン: " + String(homerun_num) + "本\nのこり　　: " + String(MAX_TRIAL[level] - trial) + "球";
+                scoreBlock.text = "もくひょう: " + String(CLEAR_HR[level]).padStart(2, ' ') + "本\nホームラン: " + String(homerun_num).padStart(2, ' ') + "本\nのこり　　: " + String(MAX_TRIAL[level] - trial).padStart(2, ' ') + "球";
                 scoreBlock.fontSize = isSmartPhone()? 20: 30;
                 scoreBlock.top = - canvas.height / 2.75;
-                scoreBlock.left =  isSmartPhone()? - canvas.width / 4: - canvas.width / 3;
+                scoreBlock.left =  isSmartPhone()? - canvas.width / 4: - canvas.width / 3.25;
                 scoreBlock.color = "rgba(247, 194, 104, 0.66)";
                 scoreBlock.outlineWidth = 4;  // 境界線をつける
                 scoreBlock.outlineColor = "black"; // 境界線の色
@@ -199,13 +199,13 @@ const createScene = async function () {
         createButton("MEDIUM", "まきゅう1", - canvas.height * 1.5/ 18);
         createButton("HARD", "まきゅう2", canvas.height * 1.5/ 18);
         createButton("ROBIKASU", "さいきょう", canvas.height * 4.5 / 18);
-        createButton("HOWTO", "(PC) Space (スマホ) タップ", canvas.height * 7.5 / 18, false);
+        createButton("HOWTO", "(PC) Space\n (スマホ) タップ", canvas.height * 7.5 / 18, false);
     }
 
     showMenu();
 
     const updateScore = () => {
-        scoreBlock.text = "もくひょう: " + String(CLEAR_HR[level]) + "本\nホームラン: " + String(homerun_num) + "本\nのこり　　: " + String(MAX_TRIAL[level] - trial) + "球";
+        scoreBlock.text = "もくひょう: " + String(CLEAR_HR[level]).padStart(2, ' ') + "本\nホームラン: " + String(homerun_num).padStart(2, ' ') + "本\nのこり　　: " + String(MAX_TRIAL[level] - trial).padStart(2, ' ') + "球";
     }
 
     const showResult = () => {
@@ -518,10 +518,10 @@ const createScene = async function () {
         }
         ball.position = new BABYLON.Vector3(-18.48, 1, 0);
         if (level == "BEGINNER" || level == "HARD") {
-            ballSpeed.x = isSmartPhone()? 0.4: 0.2;
+            ballSpeed.x = 0.5 * scene.getAnimationRatio(); // 60fps = 1.0, 30fps = 2, 144 fps = about 0.4?
         }
         else if (level == "EASY" || level == "MEDIUM" || level == "ROBIKASU") {
-            ballSpeed.x = isSmartPhone()? 0.55:0.275;
+            ballSpeed.x = 0.625 * scene.getAnimationRatio();
         }
         isHit = false;
         throwBGM.play();
