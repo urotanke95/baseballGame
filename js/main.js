@@ -434,7 +434,7 @@ const createScene = async function () {
     let batter = null;
 
     let pitcher = null;
-    BABYLON.SceneLoader.ImportMesh("", "./model/motion/", "baseball-bat-motion2.glb", scene, function (meshes, particleSystems, skeletons, animationGroupsArray) {
+    BABYLON.SceneLoader.ImportMesh("", "./model/motion/", "baseball-bat-motion2_pack.glb", scene, function (meshes, particleSystems, skeletons, animationGroupsArray) {
         if (meshes.length > 0) {
             batter = meshes[0];
             batter.position = new BABYLON.Vector3(0, 0.05, - 0.75);
@@ -457,7 +457,7 @@ const createScene = async function () {
         }
     });
 
-    BABYLON.SceneLoader.ImportMesh("", "./model/motion/", "baseball-pitch-motion.glb", scene, function (meshes, particleSystems, skeletons, animationGroupsArray) {
+    BABYLON.SceneLoader.ImportMesh("", "./model/motion/", "baseball-pitch-motion_pack.glb", scene, function (meshes, particleSystems, skeletons, animationGroupsArray) {
         if (meshes.length > 0) {
             pitcher = meshes[0];
             pitcher.position = new BABYLON.Vector3(-18.48, 0.3, 0);
